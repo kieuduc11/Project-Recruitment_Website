@@ -12,7 +12,7 @@ export class CompaniesService {
   constructor(@InjectModel(Company.name) private companyModel: SoftDeleteModel<CompanyDocument>) { }
 
   async create(createCompanyDto: CreateCompanyDto, user: IUser) {
-    const company = this.companyModel.create(
+    const company = await this.companyModel.create(
       {
         ...createCompanyDto,
         createdBy: {
@@ -32,10 +32,10 @@ export class CompaniesService {
     return `This action returns a #${id} company`;
   }
 
-  update(id: string, updateCompanyDto: UpdateCompanyDto, user: IUser) {
+  async update(id: string, updateCompanyDto: UpdateCompanyDto, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) return "Not found company";
 
-    const result = this.companyModel.updateOne({_id: id}, {
+    const result = await this.companyModel.updateOne({ _id: id }, {
       ...updateCompanyDto,
       updatedBy: {
         _id: user._id,
@@ -45,7 +45,18 @@ export class CompaniesService {
     return result;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} company`;
+  async remove(id: string, user: IUser) {
+    if (!mongoose.Types.ObjectId.isValid(id)) return "Not found company";
+
+    const result = await this.companyModel.softDelete({ _id: id });
+
+    await this.companyModel.updateOne({ _id: id }, {
+      deletedBy: {
+        _id: user._id,
+        email: user.email
+      }
+    })
+
+    return result;
   }
 }
