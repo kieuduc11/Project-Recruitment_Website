@@ -1,4 +1,4 @@
-import { Controller, Get, Render } from '@nestjs/common';
+import { Controller, Get, Render, Request } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -17,5 +17,10 @@ export class AppController {
     return {
       message
     };
+  }
+
+  @Get("/profile")
+  getProfile(@Request() req: any) {
+    return req.user;
   }
 }
