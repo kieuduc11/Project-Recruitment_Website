@@ -115,4 +115,14 @@ export class AuthService {
             throw new BadRequestException("Refresh token không hợp lệ. Vui lòng login")
         }
     }
+
+    async logout(res: Response, user: IUser) {
+        try {
+            await this.userService.updateUserToken("", user._id);
+            res.clearCookie("refresh_token");
+            return "ok"
+        } catch (error) {
+            throw new BadRequestException()
+        }
+    }
 }
