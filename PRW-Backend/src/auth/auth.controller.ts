@@ -1,9 +1,11 @@
-import { Controller, Post, UseGuards, Request, Body } from '@nestjs/common';
+import { Controller, Post, UseGuards, Req, Res, Body, Get } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
-import { Public, ResponseMessage } from 'src/decorators/customize';
+import { Public, ResponseMessage, User } from 'src/decorators/customize';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
+import { IUser } from 'src/users/users.interface';
 
 @Controller("/auth")
 export class AuthController {
@@ -15,8 +17,12 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('/login')
-  async handleLogin(@Request() req: any) {
-    return this.authService.login(req.user);
+  @ResponseMessage("User login")
+  async handleLogin(
+    @Req() req: any,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    return this.authService.login(req.user, res);
   }
 
   @Public()
@@ -24,5 +30,22 @@ export class AuthController {
   @ResponseMessage("Register a new User")
   register(@Body() registerUserDto: RegisterUserDto) {
     return this.authService.register(registerUserDto);
+  }
+
+  @Get('account')
+  @ResponseMessage("Get user information")
+  getAccountInfo(@User() user: IUser) {
+    return this.authService.getAccountInfo(user);
+  }
+
+  @Public()
+  @Get('refresh')
+  @ResponseMessage("Get access token by refresh token")
+  handleRefreshToken(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const refreshToken = req.cookies["refresh_token"];
+    return this.authService.handleRefreshToken(refreshToken, res);
   }
 }

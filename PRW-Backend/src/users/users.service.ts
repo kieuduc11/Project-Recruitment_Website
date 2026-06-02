@@ -98,6 +98,7 @@ export class UsersService {
     const user = await this.userModel.findOne({
       email: username
     });
+
     return user;
   }
 
@@ -136,5 +137,17 @@ export class UsersService {
     return {
       deleted: result
     };
+  }
+
+  async updateUserToken(refreshToken: string, id: string) {
+    const result = await this.userModel.updateOne({ _id: id }, {
+        refreshToken
+      });
+    return result
+  }
+
+  async findUserByRefreshToken(refreshToken: string) {
+    const user = await this.userModel.findOne({refreshToken}).select("-password");
+    return user
   }
 }
