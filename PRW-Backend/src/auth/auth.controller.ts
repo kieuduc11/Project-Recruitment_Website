@@ -49,7 +49,7 @@ export class AuthController {
     return this.authService.handleRefreshToken(refreshToken, res);
   }
 
-  @Get('logout')
+  @Post('logout')
   @ResponseMessage("Logout user")
   logout(
     @Res({ passthrough: true }) res: Response,
