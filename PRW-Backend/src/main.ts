@@ -28,9 +28,10 @@ async function bootstrap() {
 
   // config cors
   app.enableCors({
-    "origin": "http://localhost:3000",
+    "origin": true,
     "methods": "GET, HEAD, PUT, PATCH, POST, DELETE",
-    "optionsSuccessStatus": 200
+    "optionsSuccessStatus": 200,
+    "credentials": true
   });
 
   // config versioning
