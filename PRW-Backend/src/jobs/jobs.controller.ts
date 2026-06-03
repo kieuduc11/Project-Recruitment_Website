@@ -2,12 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
-import { ResponseMessage, User } from 'src/decorators/customize';
+import { Public, ResponseMessage, User } from 'src/decorators/customize';
 import { IUser } from 'src/users/users.interface';
 
 @Controller('jobs')
 export class JobsController {
-  constructor(private readonly jobsService: JobsService) {}
+  constructor(private readonly jobsService: JobsService) { }
 
   @Post()
   @ResponseMessage("Create a new job")
@@ -19,16 +19,18 @@ export class JobsController {
   }
 
   @Get()
+  @Public()
   @ResponseMessage("Fetch jobs with pagination")
   findAll(
     @Query("current") currentPage: string,
-    @Query("pageSize") limit: string, 
-    @Query() queryString: string 
+    @Query("pageSize") limit: string,
+    @Query() queryString: string
   ) {
     return this.jobsService.findAll(+currentPage, +limit, queryString);
   }
 
   @Get(':id')
+  @Public()
   @ResponseMessage("Fetch a job by id")
   findOne(@Param('id') id: string) {
     return this.jobsService.findOne(id);
@@ -37,7 +39,7 @@ export class JobsController {
   @Patch(':id')
   @ResponseMessage("Update a job")
   update(
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @Body() updateJobDto: UpdateJobDto,
     @User() user: IUser
   ) {

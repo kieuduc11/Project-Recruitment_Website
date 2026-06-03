@@ -11,7 +11,7 @@ import { ResponseMessage } from "src/decorators/customize";
 export class FilesController {
     @Post("upload")
     @ResponseMessage("Upload a file")
-    @UseInterceptors(FileInterceptor("file"))
+    @UseInterceptors(FileInterceptor("fileUpload"))
     uploadFile(
         @UploadedFile()
         file: Express.Multer.File,
