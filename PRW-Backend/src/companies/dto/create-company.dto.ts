@@ -9,4 +9,7 @@ export class CreateCompanyDto {
 
     @IsNotEmpty({message: "Description không được để trống"})
     description: string;
+
+    @IsNotEmpty({message: "Log không được để trống"})
+    logo: string;
 }
