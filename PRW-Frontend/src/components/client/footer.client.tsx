@@ -1,8 +1,7 @@
 
 const Footer = () => {
     return (
-        <footer>
-            <div>asfasfasf</div>
+        <footer style={{ padding: 15, textAlign: "center" }}>
         </footer>
     )
 }
