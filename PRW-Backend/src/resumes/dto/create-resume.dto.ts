@@ -28,7 +28,7 @@ export class CreateResumeDto {
   jobId: string;
 }
 
-export class CreateUserVcDto {
+export class CreateUserCvDto {
   @IsNotEmpty({ message: 'url không được để trống' })
   @IsString({ message: 'url phải là chuỗi' })
   @IsUrl({}, { message: 'url không hợp lệ' })

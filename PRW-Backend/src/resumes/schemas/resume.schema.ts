@@ -3,81 +3,70 @@ import mongoose, { HydratedDocument } from 'mongoose';
 
 export type ResumeDocument = HydratedDocument<Resume>;
 
-class UserInfo {
-  @Prop({ type: mongoose.Schema.Types.ObjectId })
-  _id: mongoose.Schema.Types.ObjectId;
-
-  @Prop()
-  email: string;
-}
-
-class History {
-  @Prop({
-    enum: ['PENDING', 'REVIEWING', 'APPROVED', 'REJECTED'],
-    required: true,
-  })
-  status: string;
-
-  @Prop({ default: Date.now })
-  updatedAt: Date;
-
-  @Prop({ type: UserInfo })
-  updatedBy: UserInfo;
-}
-
 @Schema({ timestamps: true })
 export class Resume {
-  @Prop({ required: true })
+  @Prop()
   email: string;
 
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  })
+  @Prop()
   userId: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ required: true })
+  @Prop()
   url: string;
 
-  @Prop({
-    enum: ['PENDING', 'REVIEWING', 'APPROVED', 'REJECTED'],
-    default: 'PENDING',
-  })
+  @Prop()
   status: string;
 
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Company',
-    required: true,
-  })
+  @Prop()
   companyId: mongoose.Schema.Types.ObjectId;
 
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Job',
-    required: true,
-  })
+  @Prop()
   jobId: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ type: [History], default: [] })
-  history: History[];
+  @Prop({ type: mongoose.Schema.Types.Array })
+  history: {
+    status: string;
+    updatedAt: Date;
+    updatedBy: {
+      _id: mongoose.Schema.Types.ObjectId;
+      email: string
+    }
+  } []
+
+  @Prop({type: Object})
+  createdBy: {
+    _id: mongoose.Schema.Types.ObjectId,
+    email: string
+  }
+
+  @Prop({type: Object})
+  updatedBy: {
+    _id: mongoose.Schema.Types.ObjectId,
+    email: string
+  }
+  @Prop({type: Object})
+  deletedBy: {
+    _id: mongoose.Schema.Types.ObjectId,
+    email: string
+  }
+
+  @Prop()
+  createdAt: Date
+
+  @Prop()
+  updatedAt: Date
 
   // Soft delete
-  @Prop({ default: null })
+  @Prop({
+    default: null,
+  })
   deletedAt: Date;
 
-  @Prop({ default: false })
+  @Prop({
+    default: false,
+  })
   isDeleted: boolean;
-
-  @Prop({ type: UserInfo })
-  createdBy: UserInfo;
-
-  @Prop({ type: UserInfo })
-  updatedBy: UserInfo;
-
-  @Prop({ type: UserInfo })
-  deletedBy: UserInfo;
 }
 
 export const ResumeSchema = SchemaFactory.createForClass(Resume);
+
