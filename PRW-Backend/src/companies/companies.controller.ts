@@ -7,7 +7,7 @@ import { IUser } from 'src/users/users.interface';
 
 @Controller('companies')
 export class CompaniesController {
-  constructor(private readonly companiesService: CompaniesService) {}
+  constructor(private readonly companiesService: CompaniesService) { }
 
   @Post()
   async create(@Body() createCompanyDto: CreateCompanyDto, @User() user: IUser) {
@@ -28,15 +28,16 @@ export class CompaniesController {
 
   @Get(':id')
   @Public()
+  @ResponseMessage("Get company by id")
   findOne(
     @Param('id') id: string
   ) {
-    return this.companiesService.findOne(+id);
+    return this.companiesService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
     @User() user: IUser
   ) {
