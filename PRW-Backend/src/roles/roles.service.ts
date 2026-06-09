@@ -65,7 +65,10 @@ export class RolesService {
       throw new BadRequestException("Role id không hợp lệ")
     }
 
-    const role = await this.roleModel.findById({ _id: id })
+    const role = await this.roleModel.findById({ _id: id }).populate({
+      path: "permission",
+      select: { _id: 1, apiPath: 1, name: 1, method: 1, module: 1 }
+    })
 
     return role;
   }
@@ -90,6 +93,11 @@ export class RolesService {
       throw new BadRequestException("Role id không hợp lệ")
     }
 
+    const foundRole = await this.roleModel.findById(id);
+    if (foundRole.name === "ADMIN") {
+      throw new BadRequestException("Không thể xóa role admin")
+    }
+
     await this.roleModel.updateOne({ _id: id }, {
       deletedBy: {
         _id: user._id,
@@ -97,7 +105,7 @@ export class RolesService {
       }
     })
 
-    const result = await this.roleModel.softDelete({_id: id})
+    const result = await this.roleModel.softDelete({ _id: id })
     return result;
   }
 }

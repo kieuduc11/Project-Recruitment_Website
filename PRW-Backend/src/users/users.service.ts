@@ -89,7 +89,11 @@ export class UsersService {
     const user = await this.userModel.findById({
       _id: id
     })
-      .select("-password");
+    .select("-password")
+    .populate({
+      path: "role",
+      select: {_id: 1, name: 1}
+    });
 
     return user;
   }
@@ -97,6 +101,9 @@ export class UsersService {
   async findOneByUsername(username: string) {
     const user = await this.userModel.findOne({
       email: username
+    }).populate({
+      path: "role",
+      select: {name: 1, permission: 1}
     });
 
     return user;
@@ -124,6 +131,11 @@ export class UsersService {
   async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new BadRequestException("User id không hợp lệ")
+    }
+
+    const foundUser = await this.userModel.findById(id);
+    if (foundUser.email === "admin@gmail.com") {
+      throw new BadRequestException("Không thể xóa tài khoản admin")
     }
 
     const result = await this.userModel.softDelete({ _id: id });
