@@ -1,4 +1,4 @@
-import { IBackendRes, ICompany, IAccount, IUser, IModelPaginate, IGetAccount, IJob } from '@/types/backend';
+import { IBackendRes, ICompany, IAccount, IUser, IModelPaginate, IGetAccount, IJob, IResume } from '@/types/backend';
 import axios from 'config/axios-customize';
 
 /**
@@ -65,6 +65,10 @@ export const callFetchCompany = (query: string) => {
     return axios.get<IBackendRes<IModelPaginate<ICompany>>>(`/api/v1/companies?${query}`);
 }
 
+export const callFetchCompanyById = (id: string) => {
+    return axios.get<IBackendRes<ICompany>>(`/api/v1/companies/${id}`);
+}
+
 
 /**
  * 
@@ -108,4 +112,32 @@ export const callFetchJob = (query: string) => {
 
 export const callFetchJobById = (id: string) => {
     return axios.get<IBackendRes<IJob>>(`/api/v1/jobs/${id}`);
+}
+
+/**
+ * 
+Module Resume
+ */
+export const callCreateResume = (url: string, companyId: any, jobId: any) => {
+    return axios.post<IBackendRes<IResume>>('/api/v1/resumes', { url, companyId, jobId })
+}
+
+export const callUpdateResumeStatus = (id: any, status: string) => {
+    return axios.patch<IBackendRes<IResume>>(`/api/v1/resumes/${id}`, { status })
+}
+
+export const callDeleteResume = (id: string) => {
+    return axios.delete<IBackendRes<IResume>>(`/api/v1/resumes/${id}`);
+}
+
+export const callFetchResume = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<IResume>>>(`/api/v1/resumes?${query}`);
+}
+
+export const callFetchResumeById = (id: string) => {
+    return axios.get<IBackendRes<IResume>>(`/api/v1/resumes/${id}`);
+}
+
+export const callFetchResumeByUser = () => {
+    return axios.post<IBackendRes<IResume>>(`/api/v1/resumes/by-user`);
 }
