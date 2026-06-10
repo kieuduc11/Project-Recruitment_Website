@@ -12,7 +12,9 @@ import aqp from 'api-query-params';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>) { }
+  constructor(
+    @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>,
+  ) { }
 
   getHashPassword = async (password: string) => {
     const hashPassword = await bcrypt.hash(password, 10);
@@ -103,7 +105,7 @@ export class UsersService {
       email: username
     }).populate({
       path: "role",
-      select: {name: 1, permission: 1}
+      select: {name: 1}
     });
 
     return user;
@@ -159,7 +161,11 @@ export class UsersService {
   }
 
   async findUserByRefreshToken(refreshToken: string) {
-    const user = await this.userModel.findOne({refreshToken}).select("-password");
+    const user = await this.userModel.findOne({refreshToken}).select("-password")
+    .populate({
+      path: "role",
+      select: {name: 1}
+    });
     return user
   }
 }

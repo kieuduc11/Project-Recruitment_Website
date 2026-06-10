@@ -10,13 +10,18 @@ import { UserDocument } from 'src/users/schemas/user.schema';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
+import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
+import { USER_ROLE } from 'src/databases/sample';
+import { RolesService } from 'src/roles/roles.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private userService: UsersService,
         private jwtService: JwtService,
+        private rolesService: RolesService,
         @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>,
+        @InjectModel(Role.name) private roleModel: SoftDeleteModel<RoleDocument>,
         private configService: ConfigService
     ) { };
 
@@ -27,11 +32,11 @@ export class AuthService {
 
         const isValidPassword = await this.userService.isValidPassword(password, user.password);
         if (isValidPassword) {
+            const userRole = user.role as unknown as { _id: string; name: string }
+            const temp = await this.rolesService.findOne(userRole._id);
             return {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role
+                ...user.toObject(),
+                permissions: temp?.permissions ?? []
             }
         }
 
@@ -47,7 +52,7 @@ export class AuthService {
     }
 
     async login(user: IUser, res: Response) {
-        const { _id, name, email, role } = user;
+        const { _id, name, email, role, permissions } = user;
         const payload = {
             sub: "access token",
             iss: "from server",
@@ -55,15 +60,19 @@ export class AuthService {
         };
 
         const refreshToken = this.createRefreshToken({ ...payload, sub: "refresh token" });
-        await this.userService.updateUserToken(refreshToken, _id)
+        await this.userService.updateUserToken(refreshToken, _id);
+
         res.cookie("refresh_token", refreshToken, {
             httpOnly: true,
             maxAge: ms(this.configService.get<string>("JWT_REFRESH_EXPIRE")) // miliseconds
         })
 
+        const userRole = user.role as unknown as { _id: string, name: string }
+        const temp = await this.rolesService.findOne(userRole._id)
+
         return {
             access_token: this.jwtService.sign(payload),
-            user: { _id, name, email, role }
+            user: { _id, name, email, role, permissions: temp?.permissions ?? [] }
         };
     }
 
@@ -75,11 +84,13 @@ export class AuthService {
             throw new ConflictException("Email đã được đăng ký")
         }
 
+        const userRole = await this.roleModel.findOne({ name: USER_ROLE })
+
         const hashPassword = await this.userService.getHashPassword(password);
         const user = await this.userModel.create({
             ...registerUserDto,
             password: hashPassword,
-            role: "USER"
+            role: userRole._id
         });
         return {
             _id: user._id,
@@ -87,12 +98,6 @@ export class AuthService {
         };
     }
 
-    getAccountInfo(user: IUser) {
-        const { _id, name, email, role } = user
-        return {
-            user: { _id, name, email, role }
-        }
-    }
 
     async handleRefreshToken(refreshToken: string, res: Response) {
         try {
@@ -103,12 +108,17 @@ export class AuthService {
             const user = await this.userService.findUserByRefreshToken(refreshToken);
             if (!user) throw new BadRequestException("Refresh token không hợp lệ. Vui lòng login")
 
+            const role = await this.roleModel.findById(user.role);
+
             res.clearCookie("refresh_token");
             return await this.login({
                 _id: user._id.toString(),
                 name: user.name,
                 email: user.email,
-                role: user.role.toString()
+                role: {
+                    _id: role._id.toString(),
+                    name: role.name
+                }
             }, res);
 
         } catch (error) {
