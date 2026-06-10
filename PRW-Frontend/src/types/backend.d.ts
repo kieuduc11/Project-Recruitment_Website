@@ -19,9 +19,19 @@ export interface IAccount {
     access_token: string;
     user: {
         _id: string;
-        role: string;
         email: string;
-        name: string
+        name: string;
+        role: {
+            _id: string;
+            name: string;
+        }
+        permissions: {
+            _id: string;
+            name: string;
+            apiPath: string;
+            method: string;
+            module: string;
+        }[]
     }
 }
 
@@ -50,7 +60,11 @@ export interface IUser {
     age: number;
     gender: string;
     address: string;
-    role?: string;
+    role?: {
+        _id: string;
+        name: string;
+    }
+
     company?: {
         _id: string;
         name: string;
@@ -107,6 +121,35 @@ export interface IResume {
         updatedAt: Date;
         updatedBy: { _id: string; email: string }
     }[]
+    createdBy?: string;
+    isDeleted?: boolean;
+    deletedAt?: boolean | null;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface IPermission {
+    _id?: string;
+    name?: string;
+    apiPath?: string;
+    method?: string;
+    module?: string;
+
+    createdBy?: string;
+    isDeleted?: boolean;
+    deletedAt?: boolean | null;
+    createdAt?: string;
+    updatedAt?: string;
+
+}
+
+export interface IRole {
+    _id?: string;
+    name: string;
+    description: string;
+    isActive: boolean;
+    permissions: IPermission[] | string[];
+
     createdBy?: string;
     isDeleted?: boolean;
     deletedAt?: boolean | null;
